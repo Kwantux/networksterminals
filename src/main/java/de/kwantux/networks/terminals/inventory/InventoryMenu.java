@@ -1,6 +1,7 @@
 package de.kwantux.networks.terminals.inventory;
 
 import de.kwantux.networks.Network;
+import de.kwantux.networks.terminals.component.TerminalComponent;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -25,11 +26,15 @@ public class InventoryMenu {
     private final ArrayList<ArrayList<ItemStack>> contents = new ArrayList<>();
     private int page;
     private BossBar bossBar;
+    private final TerminalComponent component;
 
     public InventoryMenu(Player player, Network network) {
 
         this.player = player;
         this.network = network;
+
+        component = new TerminalComponent(player);
+        network.addComponent(component);
 
         inventory = Bukkit.createInventory(player, 54, Component.text("Content of network " + network.name()));
         inventory.setMaxStackSize(127);
@@ -44,11 +49,14 @@ public class InventoryMenu {
 
     public void close() {
         bossBar.removeViewer(player);
+        network.removeComponent(component);
     }
 
     public Inventory getInventory() {return inventory;}
 
     public Network getNetwork() {return network;}
+
+    public TerminalComponent getComponent() {return component;}
 
     private void addControls() {
         ItemStack first = new ItemStack(Material.SPECTRAL_ARROW);

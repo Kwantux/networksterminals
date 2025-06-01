@@ -23,7 +23,8 @@ repositories {
 
 dependencies {
     compileOnly("dev.folia", "folia-api", "1.20.1-R0.1-SNAPSHOT")
-    compileOnly("maven.modrinth", "Networks", "3.0.11")
+//    compileOnly("maven.modrinth", "Networks", "3.0.11")
+    compileOnly(files("run/plugins/Networks-3.1.0-SNAPSHOT.jar"))
     paperLibrary("net.kyori", "adventure-text-minimessage", "4.13.1")
     paperLibrary("org.spongepowered", "configurate-hocon", "4.1.2")
     paperLibrary("org.spongepowered", "configurate-yaml", "4.1.2")
