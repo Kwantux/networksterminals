@@ -72,6 +72,7 @@ public class InventoryMenuListener implements Listener {
                         if (!event.isCancelled()) {
                             event.setCancelled(false);
                             Sorter.addItem(transactions.getFirst());
+                            menu.updateInventory();
                         }
                         return;
                     }
@@ -87,6 +88,7 @@ public class InventoryMenuListener implements Listener {
                         if (!event.isCancelled()) {
                             event.setCancelled(false);
                             Sorter.removeItem(transactions1.getFirst());
+                            menu.updateInventory();
                         }
                         return;
                     }
