@@ -41,7 +41,7 @@ public class TerminalComponent extends BasicComponent implements ActiveModule {
     public static ComponentType register() {
         type = ComponentType.register(
                 TerminalComponent.class,
-                "input",
+                "terminal",
                 Component.text("Input Container"),
                 false,
                 false,
