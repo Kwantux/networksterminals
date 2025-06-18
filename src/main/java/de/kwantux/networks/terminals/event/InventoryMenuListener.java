@@ -4,6 +4,7 @@ import de.kwantux.networks.Sorter;
 import de.kwantux.networks.terminals.inventory.InventoryMenu;
 import de.kwantux.networks.terminals.inventory.InventoryMenuManager;
 import de.kwantux.networks.terminals.TerminalsPlugin;
+import de.kwantux.networks.utils.PositionedItemStack;
 import de.kwantux.networks.utils.Transaction;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +15,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
+import java.util.Set;
 
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_MENU_ICON;
 
@@ -66,12 +68,12 @@ public class InventoryMenuListener implements Listener {
             case PLACE_ONE,PLACE_SOME, PLACE_ALL:
                 if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) return;
                 assert event.getCursor() != null;
-                List<Transaction> transactions = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), List.of(event.getCursor()));
-                if (!transactions.isEmpty()) {
-                    if (transactions.getFirst().stack().equals(event.getCursor())) {
+                Set<Transaction> transactions = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCursor(), null, 0)));
+                for (Transaction transaction : transactions) {
+                    if (transaction.stack().equals(event.getCursor())) {
                         if (!event.isCancelled()) {
                             event.setCancelled(false);
-                            Sorter.addItem(transactions.getFirst());
+                            Sorter.addItem(transaction);
                             menu.updateInventory();
                         }
                         return;
@@ -82,12 +84,12 @@ public class InventoryMenuListener implements Listener {
 
             case COLLECT_TO_CURSOR, PICKUP_ONE, PICKUP_HALF, PICKUP_SOME, PICKUP_ALL, DROP_ALL_CURSOR, DROP_ONE_CURSOR, DROP_ALL_SLOT, DROP_ONE_SLOT:
                 if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) return;
-                List<Transaction> transactions1 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), List.of(event.getCurrentItem()));
-                if (!transactions1.isEmpty()) {
-                    if (transactions1.getFirst().stack().equals(event.getCurrentItem())) {
+                Set<Transaction> transactions1 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+                for (Transaction transaction : transactions1) {
+                    if (transaction.stack().equals(event.getCurrentItem())) {
                         if (!event.isCancelled()) {
                             event.setCancelled(false);
-                            Sorter.removeItem(transactions1.getFirst());
+                            Sorter.removeItem(transaction);
                             menu.updateInventory();
                         }
                         return;

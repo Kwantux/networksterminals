@@ -1,11 +1,8 @@
 package de.kwantux.networks.terminals;
 
-import de.kwantux.networks.Main;
-import de.kwantux.networks.component.util.ComponentType;
 import de.kwantux.networks.terminals.commands.TerminalsCommandManager;
 import de.kwantux.networks.terminals.component.TerminalComponent;
 import de.kwantux.networks.terminals.event.InventoryMenuListener;
-import de.kwantux.networks.terminals.inventory.InventoryMenuManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
