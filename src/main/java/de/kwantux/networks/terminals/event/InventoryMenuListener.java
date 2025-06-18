@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.List;
 import java.util.Set;
 
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_MENU_ICON;
@@ -70,12 +69,10 @@ public class InventoryMenuListener implements Listener {
                 assert event.getCursor() != null;
                 Set<Transaction> transactions = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCursor(), null, 0)));
                 for (Transaction transaction : transactions) {
-                    if (transaction.stack().equals(event.getCursor())) {
-                        if (!event.isCancelled()) {
-                            event.setCancelled(false);
-                            Sorter.addItem(transaction);
-                            menu.updateInventory();
-                        }
+                    if (!event.isCancelled()) {
+                        event.setCancelled(false);
+                        Sorter.addItem(transaction);
+                        menu.updateInventory();
                         return;
                     }
                 }
@@ -86,21 +83,69 @@ public class InventoryMenuListener implements Listener {
                 if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) return;
                 Set<Transaction> transactions1 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
                 for (Transaction transaction : transactions1) {
-                    if (transaction.stack().equals(event.getCurrentItem())) {
-                        if (!event.isCancelled()) {
-                            event.setCancelled(false);
-                            Sorter.removeItem(transaction);
-                            menu.updateInventory();
-                        }
+                    if (!event.isCancelled()) {
+                        event.setCancelled(false);
+                        Sorter.removeItem(transaction);
+                        menu.updateInventory();
                         return;
                     }
                 }
                 event.setCancelled(true);
                 return;
 
-            case SWAP_WITH_CURSOR, HOTBAR_SWAP:
+            case MOVE_TO_OTHER_INVENTORY:
+                if (event.getClickedInventory().equals(player.getInventory())) {
+                    Set<Transaction> transactions2 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+                    for (Transaction transaction : transactions2) {
+                        if (!event.isCancelled()) {
+                            event.setCancelled(false);
+                            Sorter.addItem(transaction);
+                            menu.updateInventory();
+                            return;
+                        }
+                    }
+                }
+                if (event.getClickedInventory().equals(menu.getInventory())) {
+                    Set<Transaction> transactions3 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+                    for (Transaction transaction : transactions3) {
+                        if (!event.isCancelled()) {
+                            event.setCancelled(false);
+                            Sorter.removeItem(transaction);
+                            menu.updateInventory();
+                            return;
+                        }
+                    }
+                }
                 event.setCancelled(true);
                 return;
+
+            case SWAP_WITH_CURSOR:
+                Transaction addition = null;
+                Transaction removal = null;
+
+                Set<Transaction> transactions4 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCursor(), null, 0)));
+                for (Transaction transaction : transactions4) {
+                    addition = transaction;
+                }
+
+                Set<Transaction> transactions5 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+                for (Transaction transaction : transactions5) {
+                    removal = transaction;
+                }
+
+                if (!event.isCancelled() && addition != null && removal != null) {
+                    event.setCancelled(false);
+                    Sorter.removeItem(removal);
+                    Sorter.addItem(addition);
+                    menu.updateInventory();
+                    return;
+                }
+
+                event.setCancelled(true);
+                return;
+
+            case HOTBAR_SWAP:
+                event.setCancelled(true); // Not yet implemented
 
             case NOTHING, CLONE_STACK:
                 return; // No need to do anything
