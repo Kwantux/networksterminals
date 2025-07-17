@@ -6,12 +6,17 @@ import de.kwantux.networks.terminals.inventory.InventoryMenuManager;
 import de.kwantux.networks.terminals.TerminalsPlugin;
 import de.kwantux.networks.utils.PositionedItemStack;
 import de.kwantux.networks.utils.Transaction;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Set;
@@ -24,130 +29,153 @@ public class InventoryMenuListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onInventoryClicked(InventoryClickEvent event) {
+    private void scheduleUpdate(InventoryMenu menu) {
+        menu.updateInventory();
+        Bukkit.getScheduler().runTaskLater(TerminalsPlugin.instance, menu::renderInventory, 1);
+    }
+    
+    private boolean handleClick(Player player, Inventory inventory, InventoryMenu menu, InventoryAction action, ItemStack currentItem, ItemStack cursor) {
 
-        Player player = (Player) event.getWhoClicked();
-        InventoryMenu menu = InventoryMenuManager.getMenuForPlayer(player);
-        if (menu == null) return;
-
-        if (event.getCurrentItem() != null) {
+        if (currentItem != null) {
             // Handle menu controls
-            if (event.getCurrentItem().getItemMeta() != null && event.getCurrentItem().getItemMeta().getPersistentDataContainer().has(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
-                event.setCancelled(true);
-                switch (event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
+            if (currentItem.getItemMeta() != null && currentItem.getItemMeta().getPersistentDataContainer().has(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
+                switch (currentItem.getItemMeta().getPersistentDataContainer().get(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
                     case 1:
                         menu.toFirstPage();
-                        return;
+                        return true;
 
                     case 2:
                         menu.decrementPage();
-                        return;
+                        return true;
 
                     case 3:
                         menu.incrementPage();
-                        return;
+                        return true;
 
                     case 4:
                         menu.toLastPage();
-                        return;
+                        return true;
                     case null, default:
-                        return;
+                        return true;
                 }
             }
         }
 
-
         // Handle item actions
-        switch (event.getAction()) {
-            case PLACE_ONE,PLACE_SOME, PLACE_ALL:
-                if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) return;
-                assert event.getCursor() != null;
-                Set<Transaction> transactions = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCursor(), null, 0)));
+        switch (action) {
+            case PLACE_ONE, PLACE_SOME,PLACE_ALL:
+                if (inventory != null && inventory.equals(player.getInventory())) return false;
+                assert cursor != null;
+                Set<Transaction> transactions = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(cursor, null, 0)));
                 for (Transaction transaction : transactions) {
-                    if (!event.isCancelled()) {
-                        event.setCancelled(false);
-                        Sorter.addItem(transaction);
-                        menu.updateInventory();
-                        return;
-                    }
+                    Sorter.addItem(transaction);
+                    scheduleUpdate(menu);
+                    return false;
                 }
-                event.setCancelled(true);
-                return;
+                return true;
 
-            case COLLECT_TO_CURSOR, PICKUP_ONE, PICKUP_HALF, PICKUP_SOME, PICKUP_ALL, DROP_ALL_CURSOR, DROP_ONE_CURSOR, DROP_ALL_SLOT, DROP_ONE_SLOT:
-                if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) return;
-                Set<Transaction> transactions1 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+            case COLLECT_TO_CURSOR, PICKUP_ONE, PICKUP_ALL, DROP_ALL_CURSOR, DROP_ONE_CURSOR, DROP_ALL_SLOT, DROP_ONE_SLOT:
+                if (inventory != null && inventory.equals(player.getInventory())) return false;
+                assert currentItem != null;
+//                ItemStack transferred;
+//                if (action == InventoryAction.PICKUP_HALF) {
+//                    System.out.println("Pickup half");
+//                    transferred = currentItem.clone();
+//                    System.out.println("clone success");
+//                    transferred.setAmount(Math.ceilDiv(currentItem.getAmount(), 2));
+//                } else {
+//                    transferred = currentItem;
+//                }
+                Set<Transaction> transactions1 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                 for (Transaction transaction : transactions1) {
-                    if (!event.isCancelled()) {
-                        event.setCancelled(false);
-                        Sorter.removeItem(transaction);
-                        menu.updateInventory();
-                        return;
-                    }
+                    Sorter.removeItem(transaction);
+                    scheduleUpdate(menu);
+                    return false;
                 }
-                event.setCancelled(true);
-                return;
+                return true;
 
             case MOVE_TO_OTHER_INVENTORY:
-                if (event.getClickedInventory().equals(player.getInventory())) {
-                    Set<Transaction> transactions2 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+                assert currentItem != null;
+                if (inventory.equals(player.getInventory())) {
+                    Set<Transaction> transactions2 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                     for (Transaction transaction : transactions2) {
-                        if (!event.isCancelled()) {
-                            event.setCancelled(false);
-                            Sorter.addItem(transaction);
-                            menu.updateInventory();
-                            return;
-                        }
+                        Sorter.addItem(transaction);
+                        scheduleUpdate(menu);
+                        return false;
                     }
                 }
-                if (event.getClickedInventory().equals(menu.getInventory())) {
-                    Set<Transaction> transactions3 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+                if (inventory.equals(menu.getInventory())) {
+                    Set<Transaction> transactions3 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                     for (Transaction transaction : transactions3) {
-                        if (!event.isCancelled()) {
-                            event.setCancelled(false);
-                            Sorter.removeItem(transaction);
-                            menu.updateInventory();
-                            return;
-                        }
+                        Sorter.removeItem(transaction);
+                        scheduleUpdate(menu);
+                        return false;
                     }
                 }
-                event.setCancelled(true);
-                return;
+                return true;
 
             case SWAP_WITH_CURSOR:
                 Transaction addition = null;
                 Transaction removal = null;
 
-                Set<Transaction> transactions4 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCursor(), null, 0)));
+                Set<Transaction> transactions4 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(cursor, null, 0)));
                 for (Transaction transaction : transactions4) {
                     addition = transaction;
                 }
 
-                Set<Transaction> transactions5 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(event.getCurrentItem(), null, 0)));
+                Set<Transaction> transactions5 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                 for (Transaction transaction : transactions5) {
                     removal = transaction;
                 }
 
-                if (!event.isCancelled() && addition != null && removal != null) {
-                    event.setCancelled(false);
+                if (addition != null && removal != null) {
                     Sorter.removeItem(removal);
                     Sorter.addItem(addition);
-                    menu.updateInventory();
-                    return;
+                    scheduleUpdate(menu);
+                    return false;
                 }
 
-                event.setCancelled(true);
-                return;
+                return true;
 
             case HOTBAR_SWAP:
-                event.setCancelled(true); // Not yet implemented
+                return true; // Not yet implemented
 
             case NOTHING, CLONE_STACK:
-                return; // No need to do anything
+                return false; // No need to do anything
 
             default:
-                event.setCancelled(true); // For safety in case Mojang adds new actions that aren't handled
+                return true; // For safety in case Mojang adds new actions that aren't handled
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        InventoryMenu menu = InventoryMenuManager.getMenuForPlayer(player);
+        if (menu == null) return;
+        if (event.getInventory() != menu.getInventory()) return;
+        event.setCancelled(true);
+
+        // Too buggy, maybe fix later
+//        ItemStack oldCursor = event.getOldCursor();
+//        ItemStack newCursor = event.getCursor();
+//        int newCursorAmount = newCursor == null ? 0 : newCursor.getAmount();
+//        ItemStack difference = new ItemStack(oldCursor);
+//        difference.setAmount(oldCursor.getAmount() - newCursorAmount);
+//        handleClick(player, event.getInventory(), menu, InventoryAction.PLACE_SOME, null, difference);
+//        scheduleUpdate(menu);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onInventoryClicked(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        InventoryMenu menu = InventoryMenuManager.getMenuForPlayer(player);
+        if (menu == null) return;
+        try {
+            event.setCancelled(handleClick(player, event.getClickedInventory(), menu, event.getAction(), event.getCurrentItem(), event.getCursor()));
+        } catch (Exception ignored) {
+            // safety mechanism
+            event.setCancelled(true);
         }
     }
 

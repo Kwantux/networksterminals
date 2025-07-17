@@ -12,7 +12,7 @@ plugins {
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "0.1.0"
+version = "0.1.1"
 description = "Networks Addon for Terminals"
 
 repositories {

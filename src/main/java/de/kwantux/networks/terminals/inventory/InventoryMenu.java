@@ -14,7 +14,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_MENU_ICON;
 
@@ -92,7 +94,9 @@ public class InventoryMenu {
     public void updateInventory() {
         contents.clear();
         ArrayList<ItemStack> currentPage = new ArrayList<>();
-        ArrayList<ItemStack> items = network.items();
+        ArrayList<ItemStack> items = new ArrayList<>(network.items().stream().filter(Objects::nonNull).toList());
+        items.sort(Comparator.comparing(ItemStack::getAmount).reversed());
+        items.sort(Comparator.comparing(ItemStack::getType));
 
         for (ItemStack item : items) {
 
