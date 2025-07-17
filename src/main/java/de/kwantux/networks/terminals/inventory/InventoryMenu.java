@@ -71,12 +71,6 @@ public class InventoryMenu {
         itemMeta.getPersistentDataContainer().set(NETWORKS_MENU_ICON, PersistentDataType.INTEGER, 2);
         back.setItemMeta(itemMeta);
 
-        ItemStack close = new ItemStack(Material.BARRIER);
-        itemMeta = close.getItemMeta();
-        itemMeta.displayName(Component.text("X"));
-        itemMeta.getPersistentDataContainer().set(NETWORKS_MENU_ICON, PersistentDataType.INTEGER, 0);
-        close.setItemMeta(itemMeta);
-
         ItemStack forward = new ItemStack(Material.ARROW);
         itemMeta = forward.getItemMeta();
         itemMeta.displayName(Component.text("->"));
@@ -91,7 +85,6 @@ public class InventoryMenu {
 
         inventory.setItem(45, first);
         inventory.setItem(46, back);
-        inventory.setItem(49, close);
         inventory.setItem(52, forward);
         inventory.setItem(53, last);
     }

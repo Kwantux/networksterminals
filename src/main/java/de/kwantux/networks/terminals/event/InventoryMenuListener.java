@@ -36,10 +36,6 @@ public class InventoryMenuListener implements Listener {
             if (event.getCurrentItem().getItemMeta() != null && event.getCurrentItem().getItemMeta().getPersistentDataContainer().has(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
                 event.setCancelled(true);
                 switch (event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
-                    case 0:
-                        player.closeInventory();
-                        return;
-
                     case 1:
                         menu.toFirstPage();
                         return;
