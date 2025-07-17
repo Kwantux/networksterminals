@@ -12,7 +12,7 @@ plugins {
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "1.0.0-SNAPSHOT"
+version = "0.1.0"
 description = "Networks Addon for Terminals"
 
 repositories {
@@ -24,7 +24,7 @@ repositories {
 dependencies {
     compileOnly("dev.folia", "folia-api", "1.20.1-R0.1-SNAPSHOT")
 //    compileOnly("maven.modrinth", "Networks", "3.0.11")
-    compileOnly(files("run/plugins/Networks-3.1.0-SNAPSHOT.jar"))
+    compileOnly(files("run/plugins/Networks-3.1.2.jar"))
     paperLibrary("net.kyori", "adventure-text-minimessage", "4.13.1")
     paperLibrary("org.spongepowered", "configurate-hocon", "4.1.2")
     paperLibrary("org.spongepowered", "configurate-yaml", "4.1.2")
@@ -67,6 +67,6 @@ paper {
 
 tasks {
     runServer {
-        minecraftVersion("1.21.1")
+        minecraftVersion("1.21.5")
     }
 }
