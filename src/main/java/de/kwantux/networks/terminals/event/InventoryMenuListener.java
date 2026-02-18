@@ -61,12 +61,16 @@ public class InventoryMenuListener implements Listener {
             }
         }
 
+//        System.out.println("Action: " + action);
+
         // Handle item actions
         switch (action) {
-            case PLACE_ONE, PLACE_SOME,PLACE_ALL:
+            case PLACE_ONE:
                 if (inventory != null && inventory.equals(player.getInventory())) return false;
                 assert cursor != null;
-                Set<Transaction> transactions = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(cursor, null, 0)));
+                ItemStack toTransmit = cursor.clone();
+                toTransmit.setAmount(1);
+                Set<Transaction> transactions = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(toTransmit, null, 0)));
                 for (Transaction transaction : transactions) {
                     Sorter.addItem(transaction);
                     scheduleUpdate(menu);
@@ -74,7 +78,18 @@ public class InventoryMenuListener implements Listener {
                 }
                 return true;
 
-            case COLLECT_TO_CURSOR, PICKUP_ONE, PICKUP_ALL, DROP_ALL_CURSOR, DROP_ONE_CURSOR, DROP_ALL_SLOT, DROP_ONE_SLOT:
+            case PLACE_ALL:
+                if (inventory != null && inventory.equals(player.getInventory())) return false;
+                assert cursor != null;
+                Set<Transaction> transactions0 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(cursor, null, 0)));
+                for (Transaction transaction : transactions0) {
+                    Sorter.addItem(transaction);
+                    scheduleUpdate(menu);
+                    return false;
+                }
+                return true;
+
+            case COLLECT_TO_CURSOR, PICKUP_ALL, DROP_ALL_SLOT:
                 if (inventory != null && inventory.equals(player.getInventory())) return false;
                 assert currentItem != null;
 //                ItemStack transferred;
@@ -94,11 +109,37 @@ public class InventoryMenuListener implements Listener {
                 }
                 return true;
 
+            case PICKUP_HALF:
+                if (inventory != null && inventory.equals(player.getInventory())) return false;
+                assert currentItem != null;
+                ItemStack toTransmit1 = currentItem.clone();
+                toTransmit1.setAmount(Math.ceilDiv(currentItem.getAmount(), 2));
+                Set<Transaction> transactions2 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(toTransmit1, null, 0)));
+                for (Transaction transaction : transactions2) {
+                    Sorter.removeItem(transaction);
+                    scheduleUpdate(menu);
+                    return false;
+                }
+                return true;
+
+            case PICKUP_ONE, DROP_ONE_SLOT:
+                if (inventory != null && inventory.equals(player.getInventory())) return false;
+                assert currentItem != null;
+                ItemStack toTransmit2 = currentItem.clone();
+                toTransmit2.setAmount(1);
+                Set<Transaction> transactions2a = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(toTransmit2, null, 0)));
+                for (Transaction transaction : transactions2a) {
+                    Sorter.removeItem(transaction);
+                    scheduleUpdate(menu);
+                    return false;
+                }
+                return true;
+
             case MOVE_TO_OTHER_INVENTORY:
                 assert currentItem != null;
                 if (inventory.equals(player.getInventory())) {
-                    Set<Transaction> transactions2 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
-                    for (Transaction transaction : transactions2) {
+                    Set<Transaction> transactions3 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
+                    for (Transaction transaction : transactions3) {
                         Sorter.addItem(transaction);
                         scheduleUpdate(menu);
                         return false;
@@ -140,7 +181,7 @@ public class InventoryMenuListener implements Listener {
             case HOTBAR_SWAP:
                 return true; // Not yet implemented
 
-            case NOTHING, CLONE_STACK:
+            case NOTHING, CLONE_STACK, DROP_ALL_CURSOR, DROP_ONE_CURSOR:
                 return false; // No need to do anything
 
             default:
