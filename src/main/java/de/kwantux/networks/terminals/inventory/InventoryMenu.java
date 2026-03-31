@@ -4,6 +4,7 @@ import de.kwantux.networks.Network;
 import de.kwantux.networks.terminals.component.TerminalComponent;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -29,11 +30,13 @@ public class InventoryMenu {
     private int page;
     private BossBar bossBar;
     private final TerminalComponent component;
+    private final String filter;
 
-    public InventoryMenu(Player player, Network network) {
+    public InventoryMenu(Player player, Network network, String filter) {
 
         this.player = player;
         this.network = network;
+        this.filter = filter != null ? filter.toLowerCase() : null;
 
         component = new TerminalComponent(player);
         network.addComponent(component);
@@ -99,8 +102,7 @@ public class InventoryMenu {
         items.sort(Comparator.comparing(ItemStack::getType));
 
         for (ItemStack item : items) {
-
-            if (item != null) {
+            if (item != null && matchesFilter(item)) {
                 currentPage.add(item);
             }
 
@@ -111,6 +113,17 @@ public class InventoryMenu {
         }
 
         contents.add(currentPage);
+    }
+
+    private boolean matchesFilter(ItemStack item) {
+        if (filter == null) return true;
+        if (item.getItemMeta() != null && item.getItemMeta().hasDisplayName()) {
+            String displayName = PlainTextComponentSerializer.plainText()
+                    .serialize(item.getItemMeta().displayName()).toLowerCase();
+            if (displayName.contains(filter)) return true;
+        }
+        String materialName = item.getType().name().replace('_', ' ').toLowerCase();
+        return materialName.contains(filter);
     }
 
     public void renderInventory() {

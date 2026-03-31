@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.parser.standard.StringParser;
 import org.incendo.cloud.setting.ManagerSetting;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +26,7 @@ public class InterfaceCommand extends CommandHandler {
 
         cmd.command(cmd.commandBuilder("networksterminals", "networkterminals", "networksterminal", "netterm", "nt")
                 .senderType(Player.class)
+                .optional("filter", StringParser.greedyStringParser())
                 .handler(this::openMenu)
                 .permission("networks.terminals.use")
         );
@@ -43,7 +45,8 @@ public class InterfaceCommand extends CommandHandler {
         Player player = context.sender();
         Network network = selection(player);
         if (network == null) return;
-        InventoryMenuManager.addInventoryMenu(player, selection(player));
+        String filter = context.getOrDefault("filter", null);
+        InventoryMenuManager.addInventoryMenu(player, network, filter);
     }
 
 

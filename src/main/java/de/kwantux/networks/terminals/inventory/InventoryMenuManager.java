@@ -18,7 +18,11 @@ public class InventoryMenuManager {
     }
 
     static public void addInventoryMenu(Player player, Network network) {
-        list.add(new InventoryMenu(player, network));
+        list.add(new InventoryMenu(player, network, null));
+    }
+
+    static public void addInventoryMenu(Player player, Network network, String filter) {
+        list.add(new InventoryMenu(player, network, filter));
     }
 
     static public void removeInventoryMenu(Player player) {
