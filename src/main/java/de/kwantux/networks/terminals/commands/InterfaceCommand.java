@@ -30,6 +30,14 @@ public class InterfaceCommand extends CommandHandler {
                 .handler(this::openMenu)
                 .permission("networks.terminals.use")
         );
+
+        cmd.command(cmd.commandBuilder("networksterminalsselect", "networksterminalselect", "nettermsel", "nts")
+                .senderType(Player.class)
+                .required("network", NetworkParser.networkParser())
+                .optional("filter", StringParser.greedyStringParser())
+                .handler(this::openMenuWithNetwork)
+                .permission("networks.terminals.use")
+        );
     }
 
     private @Nullable Network selection(CommandSender sender) {
@@ -45,6 +53,13 @@ public class InterfaceCommand extends CommandHandler {
         Player player = context.sender();
         Network network = selection(player);
         if (network == null) return;
+        String filter = context.getOrDefault("filter", null);
+        InventoryMenuManager.addInventoryMenu(player, network, filter);
+    }
+
+    private void openMenuWithNetwork(CommandContext<Player> context) {
+        Player player = context.sender();
+        Network network = context.get("network");
         String filter = context.getOrDefault("filter", null);
         InventoryMenuManager.addInventoryMenu(player, network, filter);
     }
