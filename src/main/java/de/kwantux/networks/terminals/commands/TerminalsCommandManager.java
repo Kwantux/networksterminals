@@ -23,10 +23,6 @@ public final class TerminalsCommandManager {
         commandManager = LegacyPaperCommandManager.createNative(plugin, ExecutionCoordinator.simpleCoordinator());
         parsers = commandManager.parserRegistry();
 
-        // Register argument parsers
-//        parsers.registerParserSupplier(TypeToken.get(Network.class), op -> new NetworkParser());
-//        parsers.registerParserSupplier(TypeToken.get(ComponentType.class), op -> new ComponentTypeParser());
-
         // Register caption provider
         commandManager.captionRegistry().registerProvider(
                 CaptionProvider.forCaption(Caption.of("argument.parse.failure.network"), sender -> {

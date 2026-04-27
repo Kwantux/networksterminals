@@ -21,7 +21,9 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Set;
 
+import static de.kwantux.networks.component.module.BaseModule.spaceFree;
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_MENU_ICON;
+import static de.kwantux.networks.utils.DevelopmentUtils.devlog;
 
 public class InventoryMenuListener implements Listener {
 
@@ -40,28 +42,20 @@ public class InventoryMenuListener implements Listener {
             // Handle menu controls
             if (currentItem.getItemMeta() != null && currentItem.getItemMeta().getPersistentDataContainer().has(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
                 switch (currentItem.getItemMeta().getPersistentDataContainer().get(NETWORKS_MENU_ICON, PersistentDataType.INTEGER)) {
-                    case 1:
+                    case 1 ->
                         menu.toFirstPage();
-                        return true;
-
-                    case 2:
+                    case 2 ->
                         menu.decrementPage();
-                        return true;
-
-                    case 3:
+                    case 3 ->
                         menu.incrementPage();
-                        return true;
-
-                    case 4:
+                    case 4 ->
                         menu.toLastPage();
-                        return true;
-                    case null, default:
-                        return true;
                 }
+                return true;
             }
         }
 
-//        System.out.println("Action: " + action);
+        devlog("[Terminals] Inventory Action: " + action);
 
         // Handle item actions
         switch (action) {
@@ -138,6 +132,7 @@ public class InventoryMenuListener implements Listener {
             case MOVE_TO_OTHER_INVENTORY:
                 assert currentItem != null;
                 if (inventory.equals(player.getInventory())) {
+                    if (!spaceFree(menu.getInventory(), currentItem)) return true;
                     Set<Transaction> transactions3 = Sorter.tryDonation(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                     for (Transaction transaction : transactions3) {
                         Sorter.addItem(transaction);
@@ -146,6 +141,7 @@ public class InventoryMenuListener implements Listener {
                     }
                 }
                 if (inventory.equals(menu.getInventory())) {
+                    if (!spaceFree(player.getInventory(), currentItem)) return true;
                     Set<Transaction> transactions3 = Sorter.tryRequest(menu.getNetwork(), menu.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                     for (Transaction transaction : transactions3) {
                         Sorter.removeItem(transaction);

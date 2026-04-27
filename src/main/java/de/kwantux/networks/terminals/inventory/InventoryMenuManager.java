@@ -10,17 +10,6 @@ public class InventoryMenuManager {
 
     static private final ArrayList<InventoryMenu> list = new ArrayList<>();
 
-
-    static public void updateMenus() {
-        list.forEach(inventoryMenu -> {
-           inventoryMenu.updateInventory();
-        });
-    }
-
-    static public void addInventoryMenu(Player player, Network network) {
-        list.add(new InventoryMenu(player, network, null));
-    }
-
     static public void addInventoryMenu(Player player, Network network, String filter) {
         list.add(new InventoryMenu(player, network, filter));
     }
@@ -43,17 +32,6 @@ public class InventoryMenuManager {
         }
         return null;
     }
-
-    static public void closeAll() {
-        for (InventoryMenu menu : list) {
-            menu.player.closeInventory();
-        }
-    }
-
-    static public ArrayList<InventoryMenu> listInventoryMenus() {
-        return list;
-    }
-
 
     static public boolean isInventoryMenu(Inventory inventory) {
         for (InventoryMenu menu : list) {

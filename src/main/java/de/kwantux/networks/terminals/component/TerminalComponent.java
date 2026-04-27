@@ -4,8 +4,6 @@ package de.kwantux.networks.terminals.component;
 import de.kwantux.networks.component.BasicComponent;
 import de.kwantux.networks.component.module.ActiveModule;
 import de.kwantux.networks.component.util.ComponentType;
-import de.kwantux.networks.component.module.Donator;
-import de.kwantux.networks.component.module.Requestor;
 import de.kwantux.networks.terminals.util.PlayerOrigin;
 import de.kwantux.networks.utils.BlockLocation;
 import de.kwantux.networks.utils.NamespaceUtils;
@@ -13,7 +11,6 @@ import de.kwantux.networks.utils.Origin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 

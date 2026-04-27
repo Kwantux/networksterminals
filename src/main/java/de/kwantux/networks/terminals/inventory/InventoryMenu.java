@@ -5,7 +5,6 @@ import de.kwantux.networks.terminals.component.TerminalComponent;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,7 +16,6 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_MENU_ICON;
 
@@ -28,7 +26,7 @@ public class InventoryMenu {
     private final Inventory inventory;
     private final ArrayList<ArrayList<ItemStack>> contents = new ArrayList<>();
     private int page;
-    private BossBar bossBar;
+    private final BossBar bossBar;
     private final TerminalComponent component;
     private final String filter;
 
@@ -119,7 +117,7 @@ public class InventoryMenu {
         if (filter == null) return true;
         if (item.getItemMeta() != null && item.getItemMeta().hasDisplayName()) {
             String displayName = PlainTextComponentSerializer.plainText()
-                    .serialize(item.getItemMeta().displayName()).toLowerCase();
+                    .serialize(item.getItemMeta().itemName()).toLowerCase();
             if (displayName.contains(filter)) return true;
         }
         String materialName = item.getType().name().replace('_', ' ').toLowerCase();
@@ -129,7 +127,7 @@ public class InventoryMenu {
     public void renderInventory() {
         inventory.setContents(contents.get(page).toArray(new ItemStack[54]));
         addControls();
-        bossBar.progress((float) (page+1) / contents.size());
+        bossBar.progress((float) page / (contents.size()-1));
     }
 
     public void toFirstPage() {
