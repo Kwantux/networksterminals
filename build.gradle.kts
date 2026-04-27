@@ -12,8 +12,11 @@ plugins {
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "0.1.3"
+version = "0.1.4"
 description = "Networks Addon for Terminals"
+
+// Define Networks version at project level for access in tasks
+val networksVersion = "3.1.8"
 
 repositories {
     mavenCentral()
@@ -23,8 +26,23 @@ repositories {
 
 dependencies {
     compileOnly("dev.folia", "folia-api", "1.21.4-R0.1-SNAPSHOT")
-    compileOnly("maven.modrinth", "Networks", "3.1.7")
-//    compileOnly(files("run/plugins/Networks-3.1.7.jar"))
+    
+    // Try to use local Networks build first, fallback to Modrinth Maven
+    try {
+        // Check if local Networks project is available
+        if (file("../Networks").exists()) {
+            // Read version from Networks project
+            println("Using local Networks build version: $networksVersion")
+            compileOnly("de.kwantux", "Networks", networksVersion)
+        } else {
+            println("Local Networks not found, using Modrinth Maven")
+            compileOnly("maven.modrinth", "Networks", networksVersion) // Uses latest version
+        }
+    } catch (e: Exception) {
+        println("Failed to use local Networks, falling back to Modrinth Maven: ${e.message}")
+        compileOnly("maven.modrinth", "Networks", networksVersion) // Uses latest version
+    }
+    
     paperLibrary("net.kyori", "adventure-text-minimessage", "4.13.1")
     paperLibrary("org.spongepowered", "configurate-hocon", "4.1.2")
     paperLibrary("org.spongepowered", "configurate-yaml", "4.1.2")
@@ -66,7 +84,48 @@ paper {
 }
 
 tasks {
+    // Task to clean up old Networks versions
+    val cleanNetworks = task<Delete>("cleanNetworksPlugin") {
+        delete(fileTree("run/plugins") {
+            include("Networks-*.jar")
+            exclude("Networks-${networksVersion}.jar")
+        })
+        description = "Remove old Networks versions from plugins directory"
+        group = "run paper"
+    }
+    
+    // Task to download Networks jar to run/plugins directory
+    val downloadNetworks = task<Copy>("downloadNetworksPlugin") {
+        dependsOn(cleanNetworks)
+
+        println(cleanNetworks)
+        
+        val networksJar = file("../Networks/build/libs/Networks-${networksVersion}.jar")
+        if (networksJar.exists()) {
+            from(networksJar)
+            into("run/plugins")
+            println("Using local Networks build: ${networksJar.name}")
+        } else {
+            // Use Modrinth dependency
+            val networksConfig = configurations.create("networksJar")
+            dependencies {
+                add("networksJar", "maven.modrinth:Networks:${networksVersion}") // Use known version
+            }
+            from(networksConfig)
+            into("run/plugins")
+            rename { "Networks-${networksVersion}.jar" }
+            println("Using Modrinth Networks version: $networksVersion")
+        }
+        
+        description = "Download Networks jar to run/plugins directory"
+        group = "run paper"
+    }
+    
     runServer {
-        minecraftVersion("1.21.5")
+        minecraftVersion("1.21.11")
+        // Pass development flag to JVM
+        jvmArgs("-Dnetworks.development=true")
+        // Ensure Networks is downloaded before running server
+        dependsOn(downloadNetworks)
     }
 }
