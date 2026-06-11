@@ -12,11 +12,11 @@ plugins {
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "0.1.4"
+version = "0.1.5"
 description = "Networks Addon for Terminals"
 
 // Define Networks version at project level for access in tasks
-val networksVersion = "3.1.8"
+val networksVersion = "3.1.12"
 
 repositories {
     mavenCentral()
@@ -51,13 +51,13 @@ dependencies {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(26))
 }
 
 paper {
     main = "de.kwantux.networks.terminals.TerminalsPlugin"
     loader = "de.kwantux.networks.terminals.Loader"
-    apiVersion = "1.20"
+    apiVersion = "1.21.4"
     load = BukkitPluginDescription.PluginLoadOrder.STARTUP
     website = "https://networks.kwantux.de"
     authors = listOf("Kwantux")
@@ -122,10 +122,11 @@ tasks {
     }
     
     runServer {
+        // Ensure Networks is downloaded before running server
+        dependsOn(downloadNetworks)
+
         minecraftVersion("1.21.11")
         // Pass development flag to JVM
         jvmArgs("-Dnetworks.development=true")
-        // Ensure Networks is downloaded before running server
-        dependsOn(downloadNetworks)
     }
 }
