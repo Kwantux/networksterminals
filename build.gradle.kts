@@ -12,11 +12,11 @@ plugins {
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "0.1.5"
+version = "0.1.6"
 description = "Networks Addon for Terminals"
 
 // Define Networks version at project level for access in tasks
-val networksVersion = "3.1.12"
+val networksVersion = "3.1.13"
 
 repositories {
     mavenCentral()
@@ -46,12 +46,12 @@ dependencies {
     paperLibrary("net.kyori", "adventure-text-minimessage", "4.13.1")
     paperLibrary("org.spongepowered", "configurate-hocon", "4.1.2")
     paperLibrary("org.spongepowered", "configurate-yaml", "4.1.2")
-    paperLibrary("org.incendo", "cloud-paper", "2.0.0-beta.10")
+    paperLibrary("org.incendo", "cloud-paper", "2.0.0-beta.15")
     paperLibrary("com.google.code.gson", "gson", "2.10.1")
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(26))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 paper {
@@ -83,49 +83,70 @@ paper {
     }
 }
 
-tasks {
-    // Task to clean up old Networks versions
-    val cleanNetworks = task<Delete>("cleanNetworksPlugin") {
-        delete(fileTree("run/plugins") {
-            include("Networks-*.jar")
-            exclude("Networks-${networksVersion}.jar")
-        })
-        description = "Remove old Networks versions from plugins directory"
-        group = "run paper"
-    }
-    
-    // Task to download Networks jar to run/plugins directory
-    val downloadNetworks = task<Copy>("downloadNetworksPlugin") {
-        dependsOn(cleanNetworks)
+// Register configuration lazily outside of task blocks
+val networksConfig = configurations.register("networksJar")
 
-        println(cleanNetworks)
-        
-        val networksJar = file("../Networks/build/libs/Networks-${networksVersion}.jar")
-        if (networksJar.exists()) {
-            from(networksJar)
-            into("run/plugins")
+val networksJar = file("../Networks/build/libs/Networks-${networksVersion}.jar")
+
+// Declare dependency conditionally outside task configuration
+if (!networksJar.exists()) {
+    dependencies {
+        add(networksConfig.name, "maven.modrinth:Networks:${networksVersion}")
+    }
+}
+
+// Use tasks.register for lazy task configuration
+val cleanNetworks = tasks.register<Delete>("cleanNetworksPlugin") {
+    delete(fileTree("run/plugins") {
+        include("Networks-*.jar")
+        exclude("Networks-${networksVersion}.jar")
+    })
+    description = "Remove old Networks versions from plugins directory"
+    group = "run paper"
+}
+
+// Use tasks.register for lazy task configuration
+val downloadNetworks = tasks.register<Copy>("downloadNetworksPlugin") {
+    dependsOn(cleanNetworks)
+
+    if (networksJar.exists()) {
+        from(networksJar)
+        into("run/plugins")
+        doFirst {
             println("Using local Networks build: ${networksJar.name}")
-        } else {
-            // Use Modrinth dependency
-            val networksConfig = configurations.create("networksJar")
-            dependencies {
-                add("networksJar", "maven.modrinth:Networks:${networksVersion}") // Use known version
-            }
-            from(networksConfig)
-            into("run/plugins")
-            rename { "Networks-${networksVersion}.jar" }
+        }
+    } else {
+        from(networksConfig)
+        into("run/plugins")
+        rename { "Networks-${networksVersion}.jar" }
+        doFirst {
             println("Using Modrinth Networks version: $networksVersion")
         }
-        
-        description = "Download Networks jar to run/plugins directory"
-        group = "run paper"
+    }
+
+    description = "Download Networks jar to run/plugins directory"
+    group = "run paper"
+}
+
+tasks {
+
+    register("export") {
+        group = "build"
+        dependsOn("build")
+        doFirst {
+            if (java.toolchain.languageVersion.get() != JavaLanguageVersion.of(21)) {
+                delete(buildDir.resolve("libs"))
+                throw GradleException("Plugin should be exported with Java 21")
+            }
+        }
+
     }
     
     runServer {
         // Ensure Networks is downloaded before running server
         dependsOn(downloadNetworks)
 
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.1.2")
         // Pass development flag to JVM
         jvmArgs("-Dnetworks.development=true")
     }
