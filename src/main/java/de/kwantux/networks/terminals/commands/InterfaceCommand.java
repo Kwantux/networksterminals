@@ -2,7 +2,7 @@ package de.kwantux.networks.terminals.commands;
 
 import de.kwantux.networks.Network;
 import de.kwantux.networks.terminals.TerminalsPlugin;
-import de.kwantux.networks.terminals.inventory.InventoryMenuManager;
+import de.kwantux.networks.terminals.inventory.InventoryMenu;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.CommandManager;
@@ -54,15 +54,13 @@ public class InterfaceCommand extends CommandHandler {
         Network network = selection(player);
         if (network == null) return;
         String filter = context.getOrDefault("filter", null);
-        InventoryMenuManager.addInventoryMenu(player, network, filter);
+        new InventoryMenu(player, network, filter);
     }
 
     private void openMenuWithNetwork(CommandContext<Player> context) {
         Player player = context.sender();
         Network network = context.get("network");
         String filter = context.getOrDefault("filter", null);
-        InventoryMenuManager.addInventoryMenu(player, network, filter);
+        new InventoryMenu(player, network, filter);
     }
-
-
 }
