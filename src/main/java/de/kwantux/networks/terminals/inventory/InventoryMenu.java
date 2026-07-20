@@ -214,7 +214,7 @@ public class InventoryMenu implements CustomInventoryHolder {
         devlog("[Terminals] Inventory Action: " + action);
 
         // Handle item actions
-        Set<Transaction> transactions;
+        Collection<Transaction> transactions;
         switch (action) {
             case PLACE_ONE:
                 if (inventory != null && inventory.equals(player.getInventory())) return false;
@@ -238,12 +238,13 @@ public class InventoryMenu implements CustomInventoryHolder {
                 }
                 return true;
 
-            case COLLECT_TO_CURSOR, PICKUP_ALL, DROP_ALL_SLOT:
+            case PICKUP_ALL, DROP_ALL_SLOT:
                 if (inventory != null && inventory.equals(player.getInventory())) return false;
                 assert currentItem != null;
                 currentItem = getRealCurrentItem(currentItem);
                 transactions = Sorter.tryRequest(this.getNetwork(), this.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                 for (Transaction transaction : transactions) {
+                    currentItem.setAmount(transaction.stack().getAmount());
                     event.setCurrentItem(currentItem);
                     Sorter.removeItem(transaction);
                     scheduleUpdate();
@@ -251,14 +252,15 @@ public class InventoryMenu implements CustomInventoryHolder {
                 }
                 return true;
 
-            case PICKUP_HALF:
+            case PICKUP_HALF: // Redefined as picking up one item
                 if (inventory != null && inventory.equals(player.getInventory())) return false;
                 assert currentItem != null;
                 currentItem = getRealCurrentItem(currentItem);
                 ItemStack toTransmit1 = currentItem.clone();
-                toTransmit1.setAmount(Math.ceilDiv(currentItem.getAmount(), 2));
+                toTransmit1.setAmount(1);
                 transactions = Sorter.tryRequest(this.getNetwork(), this.getComponent(), Set.of(new PositionedItemStack(toTransmit1, null, 0)));
                 for (Transaction transaction : transactions) {
+                    currentItem.setAmount(transaction.stack().getAmount());
                     event.setCurrentItem(currentItem);
                     Sorter.removeItem(transaction);
                     scheduleUpdate();
@@ -274,6 +276,7 @@ public class InventoryMenu implements CustomInventoryHolder {
                 toTransmit2.setAmount(1);
                 transactions = Sorter.tryRequest(this.getNetwork(), this.getComponent(), Set.of(new PositionedItemStack(toTransmit2, null, 0)));
                 for (Transaction transaction : transactions) {
+                    currentItem.setAmount(transaction.stack().getAmount());
                     event.setCurrentItem(currentItem);
                     Sorter.removeItem(transaction);
                     scheduleUpdate();
@@ -298,6 +301,7 @@ public class InventoryMenu implements CustomInventoryHolder {
                     if (!spaceFree(player.getInventory(), currentItem)) return true;
                     transactions = Sorter.tryRequest(this.getNetwork(), this.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                     for (Transaction transaction : transactions) {
+                        currentItem.setAmount(transaction.stack().getAmount());
                         event.setCurrentItem(currentItem);
                         Sorter.removeItem(transaction);
                         scheduleUpdate();
@@ -306,24 +310,23 @@ public class InventoryMenu implements CustomInventoryHolder {
                 }
                 return true;
 
-            case SWAP_WITH_CURSOR:
-                assert currentItem != null;
+            case COLLECT_TO_CURSOR, SWAP_WITH_CURSOR:
+                return !(inventory != null && inventory.equals(player.getInventory()));
 
-                Transaction addition = null;
-
-                transactions = Sorter.tryDonation(this.getNetwork(), this.getComponent(), Set.of(new PositionedItemStack(cursor, null, 0)));
-                for (Transaction transaction : transactions) {
-                    addition = transaction;
-                }
-
-                if (addition != null) {
-                    event.setCurrentItem(null);
-                    Sorter.addItem(addition);
-                    scheduleUpdate();
-                    return false;
-                }
-
-                return true;
+//            case SWAP_WITH_CURSOR:
+//                assert currentItem != null;
+//
+//                transactions = Sorter.tryDonation(this.getNetwork(), this.getComponent(), Set.of(new PositionedItemStack(cursor, null, 0)));
+//                for (Transaction transaction : transactions) {
+//                    event.setCurrentItem(null);
+//                    Sorter.addItem(transaction);
+//                    counter += transaction.stack().getAmount();
+//                    devlog("INV: " + counter + "(+" + transaction.stack().getAmount() + ")");
+//                    scheduleUpdate();
+//                    return false;
+//                }
+//
+//                return true;
 
             case HOTBAR_SWAP:
                 assert inventory != null;
@@ -337,6 +340,7 @@ public class InventoryMenu implements CustomInventoryHolder {
 
                     transactions = Sorter.tryRequest(this.getNetwork(), this.getComponent(), Set.of(new PositionedItemStack(currentItem, null, 0)));
                     for (Transaction transaction : transactions) {
+                        currentItem.setAmount(transaction.stack().getAmount());
                         event.setCurrentItem(currentItem);
                         Sorter.removeItem(transaction);
                         isSuccessful = true;
