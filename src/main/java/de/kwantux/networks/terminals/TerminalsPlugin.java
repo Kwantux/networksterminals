@@ -1,5 +1,6 @@
 package de.kwantux.networks.terminals;
 
+import de.kwantux.networks.Main;
 import de.kwantux.networks.terminals.commands.TerminalsCommandManager;
 import de.kwantux.networks.terminals.component.TerminalComponent;
 import de.kwantux.networks.terminals.event.InventoryMenuListener;
@@ -25,6 +26,8 @@ public final class TerminalsPlugin extends JavaPlugin {
         new InventoryMenuListener(this);
 
         TerminalComponent.register();
+
+        Main.terminalsEnabled = true;
     }
 
     @Override
