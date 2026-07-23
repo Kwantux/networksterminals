@@ -7,7 +7,6 @@ import de.kwantux.networks.terminals.TerminalsPlugin;
 import de.kwantux.networks.terminals.component.TerminalComponent;
 import de.kwantux.networks.utils.PositionedItemStack;
 import de.kwantux.networks.utils.Transaction;
-import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -23,7 +22,6 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 import static de.kwantux.networks.component.module.BaseModule.spaceFree;
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_INDEX_CLICK;
@@ -40,7 +38,6 @@ public class InventoryMenu implements CustomInventoryHolder {
     private final BossBar bossBar;
     private final TerminalComponent component;
     private final String filter;
-    private ScheduledTask actionBarTask = null;
 
     public InventoryMenu(Player player, Network network, String filter) {
 
@@ -141,9 +138,7 @@ public class InventoryMenu implements CustomInventoryHolder {
     public void renderInventory() {
         inventory.setContents(contents.get(page).toArray(new ItemStack[54]));
         if (!network.allComponentsReady()) {
-            Consumer<ScheduledTask> task = (scheduledTask) ->
-                player.sendActionBar(Main.lang.getFinal("not_all_components_loaded"));
-            actionBarTask = Main.regionScheduler.runAtFixedRate(TerminalsPlugin.instance, player.getLocation(), task, 1, 20);
+            player.sendActionBar(Main.lang.getFinal("not_all_components_loaded"));
         }
         addControls();
         bossBar.progress((float) page / (contents.size()-1));
@@ -423,9 +418,5 @@ public class InventoryMenu implements CustomInventoryHolder {
     public void onInventoryClose(InventoryCloseEvent event) {
         bossBar.removeViewer(player);
         network.removeComponent(component);
-        if (actionBarTask != null) {
-            player.sendActionBar(Component.empty());
-            actionBarTask.cancel();
-        }
     }
 }
