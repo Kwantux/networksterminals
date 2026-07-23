@@ -79,7 +79,7 @@ public class TerminalComponent extends BasicComponent implements ActiveModule {
      */
     @Override
     public boolean isLoaded() {
-        return false;
+        return true;
     }
 
     /**
@@ -87,7 +87,7 @@ public class TerminalComponent extends BasicComponent implements ActiveModule {
      */
     @Override
     public boolean ready() {
-        return false;
+        return true;
     }
 
     @Override
