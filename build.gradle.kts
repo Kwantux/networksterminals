@@ -5,18 +5,19 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    id("xyz.jpenilla.run-paper") version "2.3.1"
+    id("xyz.jpenilla.run-paper") version "3.0.2"
     id("net.minecrell.plugin-yml.paper") version "0.6.0"
 }
 
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "0.1.7"
+version = "0.1.8"
 description = "Networks Addon for Terminals"
 
 // Define Networks version at project level for access in tasks
-val networksVersion = "3.1.15"
+val networksVersion = "3.1.16"
+val hasLocalNetworks = file("../Networks").exists()
 
 repositories {
     mavenCentral()
@@ -26,21 +27,13 @@ repositories {
 
 dependencies {
     compileOnly("dev.folia", "folia-api", "1.21.4-R0.1-SNAPSHOT")
-    
-    // Try to use local Networks build first, fallback to Modrinth Maven
-    try {
-        // Check if local Networks project is available
-        if (file("../Networks").exists()) {
-            // Read version from Networks project
-            println("Using local Networks build version: $networksVersion")
-            compileOnly("de.kwantux", "Networks", networksVersion)
-        } else {
-            println("Local Networks not found, using Modrinth Maven")
-            compileOnly("maven.modrinth", "Networks", networksVersion) // Uses latest version
-        }
-    } catch (e: Exception) {
-        println("Failed to use local Networks, falling back to Modrinth Maven: ${e.message}")
-        compileOnly("maven.modrinth", "Networks", networksVersion) // Uses latest version
+
+    if (hasLocalNetworks) {
+        println("Using local Networks composite build")
+        compileOnly("de.kwantux", "Networks", networksVersion)
+    } else {
+        println("Local Networks not found, using Modrinth Maven")
+        compileOnly("maven.modrinth", "Networks", networksVersion)
     }
     
     paperLibrary("net.kyori", "adventure-text-minimessage", "4.13.1")
@@ -109,6 +102,10 @@ val cleanNetworks = tasks.register<Delete>("cleanNetworksPlugin") {
 val downloadNetworks = tasks.register<Copy>("downloadNetworksPlugin") {
     dependsOn(cleanNetworks)
 
+    if (hasLocalNetworks) {
+        dependsOn(gradle.includedBuild("Networks").task(":build"))
+    }
+
     if (networksJar.exists()) {
         from(networksJar)
         into("run/plugins")
@@ -130,6 +127,12 @@ val downloadNetworks = tasks.register<Copy>("downloadNetworksPlugin") {
 
 tasks {
 
+    if (hasLocalNetworks) {
+        named("build") {
+            dependsOn(gradle.includedBuild("Networks").task(":build"))
+        }
+    }
+
     register("export") {
         group = "build"
         dependsOn("build")
@@ -149,5 +152,9 @@ tasks {
         minecraftVersion("26.1.2")
         // Pass development flag to JVM
         jvmArgs("-Dnetworks.development=true")
+    }
+
+    named("runFolia") {
+        dependsOn(downloadNetworks)
     }
 }
