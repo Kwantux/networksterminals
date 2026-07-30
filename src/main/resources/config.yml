@@ -1,0 +1,4 @@
+# Network names that every player with networks.terminals.use may open via /nts.
+# Private networks remain limited to their owner and explicitly listed users.
+# Keep this empty to preserve private-only access.
+public-networks: []

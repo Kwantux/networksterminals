@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static de.kwantux.networks.Main.lang;
 import static de.kwantux.networks.Main.mgr;
+import static de.kwantux.networks.terminals.util.NetworkAccessPolicy.canOpen;
 
 public class InterfaceCommand extends CommandHandler {
 
@@ -53,6 +54,7 @@ public class InterfaceCommand extends CommandHandler {
         Player player = context.sender();
         Network network = selection(player);
         if (network == null) return;
+        if (!canAccess(player, network)) return;
         String filter = context.getOrDefault("filter", null);
         new InventoryMenu(player, network, filter);
     }
@@ -60,7 +62,16 @@ public class InterfaceCommand extends CommandHandler {
     private void openMenuWithNetwork(CommandContext<Player> context) {
         Player player = context.sender();
         Network network = context.get("network");
+        if (!canAccess(player, network)) return;
         String filter = context.getOrDefault("filter", null);
         new InventoryMenu(player, network, filter);
+    }
+
+    private boolean canAccess(Player player, Network network) {
+        if (canOpen(player, network)) {
+            return true;
+        }
+        lang.message(player, "permission.user");
+        return false;
     }
 }

@@ -15,10 +15,12 @@ import org.incendo.cloud.parser.ParserDescriptor;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static de.kwantux.networks.Main.mgr;
+import static de.kwantux.networks.terminals.util.NetworkAccessPolicy.isPublic;
 
 
 public final class NetworkParser implements ArgumentParser<CommandSender, Network>, BlockingSuggestionProvider.Strings<CommandSender> {
@@ -47,9 +49,14 @@ public final class NetworkParser implements ArgumentParser<CommandSender, Networ
             final @NotNull CommandContext<CommandSender> commandContext,
             final @NotNull CommandInput input) {
 
-        List<String> output = new ArrayList<>();
+        Set<String> output = new LinkedHashSet<>();
 
         if (commandContext.sender() instanceof Player) {
+            for (Network network : mgr.getNetworks()) {
+                if (isPublic(network)) {
+                    output.add(network.name());
+                }
+            }
             for (Network network : mgr.withUser(((Player) commandContext.sender()).getUniqueId())) {
                 output.add(network.name());
             }
@@ -59,7 +66,7 @@ public final class NetworkParser implements ArgumentParser<CommandSender, Networ
             }
         }
 
-        return output;
+        return List.copyOf(output);
     }
 
 

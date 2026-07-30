@@ -16,19 +16,19 @@ public class InventoryMenuListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getInventory().getHolder() instanceof CustomInventoryHolder holder)
+        if (event.getView().getTopInventory().getHolder() instanceof CustomInventoryHolder holder)
             holder.onInventoryDrag(event);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onInventoryClicked(InventoryClickEvent event) {
-        if (event.getInventory().getHolder() instanceof CustomInventoryHolder holder)
+        if (event.getView().getTopInventory().getHolder() instanceof CustomInventoryHolder holder)
             holder.onInventoryClicked(event);
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getInventory().getHolder() instanceof CustomInventoryHolder holder)
+        if (event.getView().getTopInventory().getHolder() instanceof CustomInventoryHolder holder)
             holder.onInventoryClose(event);
     }
 }
