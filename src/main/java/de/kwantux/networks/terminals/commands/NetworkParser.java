@@ -57,7 +57,7 @@ public final class NetworkParser implements ArgumentParser<CommandSender, Networ
                     output.add(network.name());
                 }
             }
-            for (Network network : mgr.withUser(((Player) commandContext.sender()).getUniqueId())) {
+            for (Network network : mgr.listNetworksUsableByPlayer(((Player) commandContext.sender()).getUniqueId())) {
                 output.add(network.name());
             }
         } else {

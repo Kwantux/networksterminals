@@ -4,13 +4,13 @@ import de.kwantux.networks.Network;
 import de.kwantux.networks.terminals.TerminalsPlugin;
 import org.bukkit.entity.Player;
 
+import static de.kwantux.networks.Main.mgr;
+
 public final class NetworkAccessPolicy {
     private NetworkAccessPolicy() {}
 
     public static boolean canOpen(Player player, Network network) {
-        return isPublic(network)
-                || network.owner().equals(player.getUniqueId())
-                || network.users().contains(player.getUniqueId());
+        return isPublic(network) || mgr.permissionUser(player, network);
     }
 
     public static boolean isPublic(Network network) {
