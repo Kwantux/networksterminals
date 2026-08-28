@@ -1,7 +1,9 @@
 package de.kwantux.networks.terminals.util;
 
+import de.kwantux.networks.terminals.inventory.NetworkItemStackDisplay;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -14,11 +16,11 @@ import java.util.Comparator;
  * safe virtual view in the same category order as ordinary chests.
  */
 public final class ChestSortCompatibility {
-    private static Comparator<ItemStack> comparator;
+    private static Comparator<NetworkItemStackDisplay> comparator;
 
     private ChestSortCompatibility() {}
 
-    public static Comparator<ItemStack> comparator() {
+    public static Comparator<NetworkItemStackDisplay> comparator() {
         if (comparator != null) {
             return comparator;
         }
@@ -35,7 +37,7 @@ public final class ChestSortCompatibility {
                 if (instance instanceof Comparator<?> rawComparator) {
                     @SuppressWarnings("unchecked")
                     Comparator<ItemStack> itemComparator = (Comparator<ItemStack>) rawComparator;
-                    comparator = itemComparator;
+                    comparator = (left, right) -> itemComparator.compare(left.getItemStack(), right.getItemStack());
                     return comparator;
                 }
             } catch (ReflectiveOperationException | LinkageError ignored) {
@@ -44,9 +46,9 @@ public final class ChestSortCompatibility {
         }
 
         comparator = Comparator
-                .comparing((ItemStack item) -> item.getType().name())
-                .thenComparing(item -> PlainTextComponentSerializer.plainText()
-                        .serialize(item.displayName()), String.CASE_INSENSITIVE_ORDER);
+                .comparing(NetworkItemStackDisplay::getAmount).reversed()
+                .thenComparing(display -> PlainTextComponentSerializer.plainText()
+                        .serialize(display.getItemStack().displayName()), String.CASE_INSENSITIVE_ORDER);
         return comparator;
     }
 }

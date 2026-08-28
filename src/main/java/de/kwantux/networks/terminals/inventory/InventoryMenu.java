@@ -109,11 +109,7 @@ public class InventoryMenu implements CustomInventoryHolder {
         // Generate the virtual terminal in the same category-aware order as
         // ChestSort Plus. Never let a generic chest sorter rewrite these GUI
         // slots directly: they are views backed by real network transactions.
-        items.sort((left, right) -> {
-            int itemOrder = comparator().compare(left.getItemStack(), right.getItemStack());
-            if (itemOrder != 0) return itemOrder;
-            return Long.compare(right.getAmount(), left.getAmount());
-        });
+        items.sort(comparator());
 
         for (int i = 0; i < items.size(); i++) {
             NetworkItemStackDisplay item = items.get(i);
