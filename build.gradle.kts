@@ -39,7 +39,7 @@ dependencies {
     paperLibrary("net.kyori", "adventure-text-minimessage", "4.13.1")
     paperLibrary("org.spongepowered", "configurate-hocon", "4.1.2")
     paperLibrary("org.spongepowered", "configurate-yaml", "4.1.2")
-    paperLibrary("org.incendo", "cloud-paper", "2.0.0-beta.15")
+    paperLibrary("org.incendo", "cloud-paper", "2.0.0-beta.16")
     paperLibrary("com.google.code.gson", "gson", "2.10.1")
 }
 
@@ -149,7 +149,7 @@ tasks {
         // Ensure Networks is downloaded before running server
         dependsOn(downloadNetworks)
 
-        minecraftVersion("26.1.2")
+        minecraftVersion("26.2")
         // Pass development flag to JVM
         jvmArgs("-Dnetworks.development=true")
     }
