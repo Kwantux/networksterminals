@@ -247,7 +247,7 @@ public class InventoryMenu implements CustomInventoryHolder {
     }
 
     private void audit(String action, ItemStack stack, int amount) {
-        TerminalsPlugin.instance.getLogger().info(
+        devlog(
                 "[transaction] player=" + player.getName()
                         + " network=" + network.name()
                         + " action=" + action
