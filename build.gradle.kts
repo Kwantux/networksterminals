@@ -12,11 +12,11 @@ plugins {
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "0.1.8"
+version = "0.1.9"
 description = "Networks Addon for Terminals"
 
 // Define Networks version at project level for access in tasks
-val networksVersion = "3.1.16"
+val networksVersion = "3.1.17"
 val hasLocalNetworks = file("../Networks").exists()
 
 repositories {
