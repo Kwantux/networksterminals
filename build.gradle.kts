@@ -16,7 +16,7 @@ version = "0.1.9"
 description = "Networks Addon for Terminals"
 
 // Define Networks version at project level for access in tasks
-val networksVersion = "3.1.17"
+val networksVersion = "3.1.18"
 val hasLocalNetworks = file("../Networks").exists()
 
 repositories {
@@ -44,7 +44,7 @@ dependencies {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(26))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 paper {
@@ -134,6 +134,7 @@ tasks {
     }
 
     register("export") {
+        description = "Build a jar of the plugin and check that it's built with Java 21"
         group = "build"
         dependsOn("build")
         doFirst {
