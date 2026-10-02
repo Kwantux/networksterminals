@@ -5,6 +5,7 @@ import de.kwantux.networks.terminals.commands.TerminalsCommandManager;
 import de.kwantux.networks.terminals.component.TerminalComponent;
 import de.kwantux.networks.terminals.event.InventoryMenuListener;
 import de.kwantux.networks.terminals.inventory.InventoryMenu;
+import de.kwantux.networks.terminals.util.BedrockCheck;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
@@ -22,6 +23,7 @@ public final class TerminalsPlugin extends JavaPlugin {
         logger = getLogger();
         saveDefaultConfig();
 
+        BedrockCheck.init(this);
         new TerminalsCommandManager(this);
         getServer().getMessenger().registerOutgoingPluginChannel(this, "networks:test");
 

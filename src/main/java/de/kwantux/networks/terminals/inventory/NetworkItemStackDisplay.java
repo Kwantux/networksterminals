@@ -18,12 +18,14 @@ import static de.kwantux.networks.terminals.util.Keys.NETWORKS_INDEX_CLICK;
 public class NetworkItemStackDisplay {
     private final ItemStack itemStack;
     private int amount;
+    private boolean isBedrock;
 
-    public NetworkItemStackDisplay(ItemStack is) {
+    public NetworkItemStackDisplay(ItemStack is, boolean isBedrock) {
         Objects.requireNonNull(is);
         this.amount = is.getAmount();
         this.itemStack = is.clone();
         this.itemStack.setAmount(1);
+        this.isBedrock = isBedrock;
     }
 
     public ItemStack display(int indexClick) {
@@ -53,7 +55,7 @@ public class NetworkItemStackDisplay {
                 meta.lore(lore);
             }
         });
-        display.setAmount(Math.min(amount, 99));
+        display.setAmount(Math.min(amount, isBedrock ? 64 : 99));
 
         return display;
     }

@@ -23,10 +23,12 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://api.modrinth.com/maven")
+    maven("https://repo.opencollab.dev/main/")
 }
 
 dependencies {
     compileOnly("dev.folia", "folia-api", "1.21.4-R0.1-SNAPSHOT")
+    compileOnly("org.geysermc.floodgate", "api", "2.2.4-SNAPSHOT")
 
     if (hasLocalNetworks) {
         println("Using local Networks composite build")
@@ -44,7 +46,7 @@ dependencies {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(26))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 }
 
 paper {
@@ -71,6 +73,11 @@ paper {
         register("Networks") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = true
+            joinClasspath = true
+        }
+        register("floodgate") {
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            required = false
             joinClasspath = true
         }
     }
@@ -143,9 +150,8 @@ tasks {
                 throw GradleException("Plugin should be exported with Java 21")
             }
         }
-
     }
-    
+
     runServer {
         // Ensure Networks is downloaded before running server
         dependsOn(downloadNetworks)

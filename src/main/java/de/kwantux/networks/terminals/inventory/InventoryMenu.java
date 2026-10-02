@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
+import static de.kwantux.networks.terminals.util.BedrockCheck.isBedrockPlayer;
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_INDEX_CLICK;
 import static de.kwantux.networks.terminals.util.Keys.NETWORKS_MENU_COMMAND;
 import static de.kwantux.networks.terminals.util.ChestSortCompatibility.comparator;
@@ -103,7 +104,7 @@ public class InventoryMenu implements CustomInventoryHolder {
                     ni.increaseAmount(i.getAmount());
                     return;
                 }
-            items.add(new NetworkItemStackDisplay(i));
+            items.add(new NetworkItemStackDisplay(i, isBedrockPlayer(player.getUniqueId())));
         });
 
         // Generate the virtual terminal in the same category-aware order as
