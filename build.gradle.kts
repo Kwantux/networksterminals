@@ -12,7 +12,7 @@ plugins {
 runPaper.folia.registerTask()
 
 group = "de.kwantux.networks"
-version = "0.1.9"
+version = "0.1.10"
 description = "Networks Addon for Terminals"
 
 // Define Networks version at project level for access in tasks
@@ -44,7 +44,7 @@ dependencies {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(26))
 }
 
 paper {

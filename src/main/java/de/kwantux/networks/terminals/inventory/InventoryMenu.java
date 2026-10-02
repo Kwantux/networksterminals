@@ -429,16 +429,6 @@ public class InventoryMenu implements CustomInventoryHolder {
             return true;
         }
 
-        // Only shift-clicking a player item is a terminal action (deposit).
-        // All other player-inventory actions must retain vanilla behaviour.
-        if (inventory != null && inventory.equals(player.getInventory())) {
-            // Vanilla double-click collection would also scan the terminal's
-            // virtual top inventory and can copy/remove display stacks without
-            // a Networks transaction. Disable only that cross-inventory action.
-            if (action == InventoryAction.COLLECT_TO_CURSOR) return true;
-            if (action != InventoryAction.MOVE_TO_OTHER_INVENTORY) return false;
-        }
-
         devlog("[Terminals] Inventory Action: " + action);
 
         // Handle item actions
@@ -477,7 +467,7 @@ public class InventoryMenu implements CustomInventoryHolder {
                 return true;
 
             case COLLECT_TO_CURSOR:
-                if (inventory != null && inventory.equals(player.getInventory())) return false;
+                if (inventory != null && inventory.equals(player.getInventory())) return false; // Collecting to cursor in own inventory is allowed because display items are unobtainable
                 assert currentItem != null;
                 currentItem = getRealCurrentItem(currentItem);
                 withdrawToCursor(event, currentItem, currentItem.getMaxStackSize());
@@ -588,16 +578,7 @@ public class InventoryMenu implements CustomInventoryHolder {
         donation.setAmount(totalAmount);
 
         if (donateToNetwork(donation)) {
-            int remaining = oldCursor.getAmount() - totalAmount;
-            if (remaining == 0) {
-                event.setCursor(null);
-            } else {
-                ItemStack cursor = oldCursor.clone();
-                cursor.setAmount(remaining);
-                event.setCursor(cursor);
-            }
             scheduleUpdate();
-            event.setCancelled(true);
             return;
         }
 
