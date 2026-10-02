@@ -434,7 +434,7 @@ public class InventoryMenu implements CustomInventoryHolder {
         // Handle item actions
         switch (action) {
             case PLACE_ONE:
-                if (inventory == null || !inventory.equals(this.inventory) || cursor == null) return true;
+                if (inventory == null || inventory.equals(player.getInventory())) return false;
                 ItemStack toTransmit = cursor.clone();
                 toTransmit.setAmount(1);
                 if (donateToNetwork(toTransmit)) {
@@ -451,7 +451,7 @@ public class InventoryMenu implements CustomInventoryHolder {
                 return true;
 
             case PLACE_ALL:
-                if (inventory == null || !inventory.equals(this.inventory) || cursor == null) return true;
+                if (inventory == null || inventory.equals(player.getInventory())) return false;
                 if (donateToNetwork(cursor.clone())) {
                     event.setCursor(null);
                     scheduleUpdate();
