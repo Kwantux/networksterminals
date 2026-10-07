@@ -15,10 +15,7 @@ public class Loader implements PluginLoader {
         MavenLibraryResolver resolver = new MavenLibraryResolver();
         resolver.addRepository(new RemoteRepository.Builder("paper", "default", "https://repo.papermc.io/repository/maven-public/").build());
         resolver.addDependency(new Dependency(new DefaultArtifact("net.kyori:adventure-text-minimessage:4.13.1"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.spongepowered:configurate-hocon:4.1.2"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.spongepowered:configurate-yaml:4.1.2"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.incendo:cloud-paper:2.0.0-beta.16"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("com.google.code.gson:gson:2.10.1"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("org.incendo:cloud-paper:2.0.1"), null));
 
         classpathBuilder.addLibrary(resolver);
     }
